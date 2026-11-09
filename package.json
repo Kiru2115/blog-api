@@ -1,8 +1,8 @@
 {
-  "name": "nestjs-project-boilerplate",
-  "version": "0.2.2",
-  "description": "",
-  "author": "generacja-innowacja",
+  "name": "blog-api",
+  "version": "0.1.0",
+  "description": "Back-End Blog - Alan Maroń",
+  "author": "Alan Maroń",
   "private": true,
   "license": "proprietary",
   "scripts": {
