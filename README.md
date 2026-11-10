@@ -1,97 +1,76 @@
-# Nest.js project boilerplate nestjs-project-boilerplate
+# Blog API
 
-## Repository contents
+Back end of my personal blog, built with Nest.js, Prisma and PostgreSQL.
 
-Repository contains boilerplate project using Nest.js.
-
-Project is using Node.js and TypeScript in versions listed below:
+## Tech stack
 
 | Technology | Version |
 | ---------- | ------- |
-| Node.js    | 24.10   |
+| Node.js    | 24      |
 | TypeScript | 5.8     |
+| Nest.js    | 11      |
+| Prisma     | 7       |
+| PostgreSQL | 16      |
 
-Main dependencies are Nest.js and Prisma ORM in versions listed below.
+## Requirements
 
-| Vendor  | Version |
-| ------- | ------- |
-| Nest.js | ^11.1   |
-| Prisma  | ^6.7.0  |
+- Docker with Docker Compose
+- Git
+- On Windows: WSL 2, with the repository kept inside the WSL file system
 
-## Infrastructure
+You do not need Node.js on your machine. Everything runs in containers.
 
-We use the following services:
+## Getting started
 
-- AWS EC2 instance with Dokku, with:
-    - app container (docker container locally)
-    - PostgreSQL database (PostgreSQL container locally)
+1. Clone the repository:
 
-Locally, they are set up using `docker compose`.
-
-### Setting project up
-
-This app uses docker-based virtualization to run. In order to set up project, follow these steps:
-
-1. Clone project by running:
     ```shell
-    git clone git@github.com:oskarbarcz/nestjs-project-boilerplate.git
+    git clone https://github.com/Kiru2115/blog-api.git
+    cd blog-api
     ```
-2. Prepare environment variable file by copying .env.dist to .env and fill it with your data.
+
+2. Create the environment file:
+
     ```shell
-    cd nestjs-project-boilerplate
     cp .env.dist .env
     ```
-3. Use `docker compose` to set up the environment
+
+3. Start the containers:
 
     ```shell
-    docker compose up -d --build
+    docker compose up -d --build --wait
     ```
 
-    Packages, database schema, seed data will be configured automatically.
+    On every start the app installs packages, generates the Prisma client,
+    applies migrations, seeds the database and starts Nest.js in watch mode.
 
-4. Your project should be up and running. Open browser and go to http://localhost/api to see the api documentation.
-   You can preview app logs by running:
-    ```shell
-    docker compose logs -f app
-    ```
+4. Check that it works:
+    - http://localhost/ returns the status and version
+    - http://localhost/api shows the Swagger documentation
 
-### Running the project tips
-
-> **Do not execute NPM or any other commands regarding project from your host machine, use container shell instead.**
-> For example, to generate Prisma schema run:
->
-> ```shell
-> docker compose exec app npm run lint
-> ```
->
-> It will execute the `npm run lint` command in the container shell.
-
-To shut down the containers run:
+To see the logs, run:
 
 ```shell
-docker compose down
+docker compose logs -f app
 ```
 
-## Testing
+## Running checks
 
-To run tests, execute the following commands:
+Run `npm`, `npx` and `node` only inside the app container, never on your machine:
 
-```bash
-# unit tests
-$ docker compose exec app npm run test
-
-# functional tests
-$ docker compose exec app npm run test:functional
+```shell
+docker compose exec app npm run format
+docker compose exec app npm run lint
+docker compose exec app npm run test:functional
 ```
 
-We use **Jest** for unit tests, and **cucumber-js** for functional tests. Unit tests are stored in the `src` directory
-just near the tested module, while functional tests are stored in the `features` directory.
+## Versioning
 
-## Release & deploy
+The version lives in `package.json` and follows semver. Bump it in every pull request:
+minor for features, patch for fixes. Every merge to `main` creates a git tag and a GitHub release.
 
-> Before merging Pull Request to the main branch, make sure to bump the project version in the `package.json` file,
-> line `3`. Then it's a good practice to run `npm install` inside a docker container to update the `package-lock.json`
-> file.
->
-> Not bumping the version will result in the release failure. There is a step in CI that will protect the main branch
-> from being merged without bumping the version.
+## Troubleshooting
+
+- `Port is already allocated` for 80 or 5432: another program uses that port,
+  often a local PostgreSQL or another Docker project.
+- The app does not start: check `docker compose logs app`.
