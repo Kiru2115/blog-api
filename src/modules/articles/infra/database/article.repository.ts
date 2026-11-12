@@ -20,6 +20,27 @@ export class ArticleRepository {
 
     return record ? toArticle(record) : null;
   }
+
+  async create(
+    data: Pick<Article, 'title' | 'content' | 'publishedAt'>,
+  ): Promise<Article> {
+    const record = await this.prisma.article.create({ data });
+
+    return toArticle(record);
+  }
+
+  async update(
+    id: string,
+    data: Pick<Article, 'title' | 'content'>,
+  ): Promise<Article> {
+    const record = await this.prisma.article.update({ where: { id }, data });
+
+    return toArticle(record);
+  }
+
+  async delete(id: string): Promise<void> {
+    await this.prisma.article.delete({ where: { id } });
+  }
 }
 
 function toArticle(record: ArticleRecord): Article {

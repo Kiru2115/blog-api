@@ -13,9 +13,9 @@ function createSwaggerConfig() {
       {
         type: 'http',
         scheme: 'bearer',
-        bearerFormat: 'JWT',
+        bearerFormat: 'admin token',
         description:
-          'Enter your JWT token in the format: **Bearer &lt;token&gt;**',
+          'Paste the admin token. Swagger adds the word Bearer for you.',
       },
       'access-token',
     )
@@ -25,5 +25,7 @@ function createSwaggerConfig() {
 export function configureSwagger(app: INestApplication): void {
   const config = createSwaggerConfig();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
+  SwaggerModule.setup('api', app, document, {
+    swaggerOptions: { persistAuthorization: true },
+  });
 }
