@@ -1,4 +1,4 @@
-import { When, Then, Given, After } from '@cucumber/cucumber';
+import { When, Then, Given, After, DataTable } from '@cucumber/cucumber';
 import axios, { AxiosResponse } from 'axios';
 import expect from 'expect';
 import { execSync } from 'child_process';
@@ -9,7 +9,8 @@ let apiToken: string | null = null;
 let apiResponse: AxiosResponse;
 
 Given('I use seed data', () => {
-  execSync('npx prisma migrate reset --force --skip-generate > /dev/null');
+  execSync('npx prisma migrate reset --force > /dev/null');
+  execSync('npx prisma db seed > /dev/null');
 });
 
 Given('I use admin token', async () => {
@@ -64,6 +65,18 @@ Then('the response body should contain:', async function (docString: string) {
 
   deepCompare(actual, expected);
 });
+
+Then(
+  'the response body should list the articles in this order:',
+  (table: DataTable) => {
+    const expectedIds = table.raw().map(([id]) => id);
+    const actualIds = apiResponse.data.map(
+      (article: { id: string }) => article.id,
+    );
+
+    expect(actualIds).toEqual(expectedIds);
+  },
+);
 
 Then('I dump response', () => {
   console.log(JSON.stringify(apiResponse.data));
