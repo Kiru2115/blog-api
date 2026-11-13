@@ -29,7 +29,7 @@ When(
       method: method,
       url: url,
       validateStatus: () => true,
-      headers: apiToken === '' ? {} : { Authorization: `Bearer ${apiToken}` },
+      headers: authorizationHeader(),
     });
   },
 );
@@ -43,7 +43,7 @@ When(
       url: url,
       data: JSON.parse(body),
       validateStatus: () => true,
-      headers: apiToken === '' ? {} : { Authorization: `Bearer ${apiToken}` },
+      headers: authorizationHeader(),
     });
   },
 );
@@ -85,3 +85,26 @@ Then('I dump response', () => {
 After(() => {
   apiToken = null;
 });
+
+Given('I use no token', () => {
+  apiToken = null;
+});
+
+Given('I use a wrong token', () => {
+  apiToken = 'wrong-token';
+});
+
+function authorizationHeader(): Record<string, string> {
+  return apiToken === null ? {} : { Authorization: `Bearer ${apiToken}` };
+}
+
+Then(
+  'the response body should include an article titled {string}',
+  (title: string) => {
+    const titles = apiResponse.data.map(
+      (article: { title: string }) => article.title,
+    );
+
+    expect(titles).toContain(title);
+  },
+);

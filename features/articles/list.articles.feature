@@ -74,3 +74,11 @@ Feature: As a visitor I can list the blog articles
       | 5e1f0a2b-0004-4000-8000-000000000004 |
       | 5e1f0a2b-0002-4000-8000-000000000002 |
       | 5e1f0a2b-0001-4000-8000-000000000001 |
+
+  Scenario: As a visitor without a token I can still read the articles
+    Given I use seed data
+    And I use no token
+    When I send a "GET" request to "/api/v1/articles"
+    Then the response status should be 200
+    When I send a "GET" request to "/api/v1/articles/5e1f0a2b-0001-4000-8000-000000000001"
+    Then the response status should be 200
