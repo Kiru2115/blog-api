@@ -1,5 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import { Body, Controller, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { CommandBus } from '@nestjs/cqrs';
+import { CommandBus, QueryBus } from '@nestjs/cqrs';
 import {
   ApiBearerAuth,
   ApiOperation,
@@ -11,6 +12,7 @@ import { GenericBadRequestResponse } from '../../../../../../core/http/response/
 import { ForbiddenResponse } from '../../../../../../core/http/response/forbidden.response';
 import { UnauthorizedResponse } from '../../../../../../core/http/response/unauthorized.response';
 import { CreateArticleCommand } from '../../../../application/command/create-article.command';
+import { GetArticleByIdQuery } from '../../../../application/query/get-article-by-id.query';
 import { ArticleRequest } from '../../request/article.request';
 import {
   ArticleResponse,
@@ -21,7 +23,10 @@ import {
 @ApiBearerAuth('access-token')
 @Controller('api/v1/articles')
 export class CreateArticleAction {
-  constructor(private readonly commandBus: CommandBus) {}
+  constructor(
+    private readonly commandBus: CommandBus,
+    private readonly queryBus: QueryBus,
+  ) {}
 
   @Post()
   @UseGuards(AdminGuard)
@@ -48,9 +53,13 @@ export class CreateArticleAction {
     type: ForbiddenResponse,
   })
   async handle(@Body() request: ArticleRequest): Promise<ArticleResponse> {
-    const article = await this.commandBus.execute(
-      new CreateArticleCommand(request.title, request.content),
+    const id = randomUUID();
+
+    // The command only writes. The new article is read back with a query.
+    await this.commandBus.execute(
+      new CreateArticleCommand(id, request.title, request.content),
     );
+    const article = await this.queryBus.execute(new GetArticleByIdQuery(id));
 
     return toArticleResponse(article);
   }

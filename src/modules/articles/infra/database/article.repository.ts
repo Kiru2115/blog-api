@@ -21,21 +21,22 @@ export class ArticleRepository {
     return record ? toArticle(record) : null;
   }
 
-  async create(
-    data: Pick<Article, 'title' | 'content' | 'publishedAt'>,
-  ): Promise<Article> {
-    const record = await this.prisma.article.create({ data });
-
-    return toArticle(record);
+  async create(article: Article): Promise<void> {
+    await this.prisma.article.create({
+      data: {
+        id: article.id,
+        title: article.title,
+        content: article.content,
+        publishedAt: article.publishedAt,
+      },
+    });
   }
 
   async update(
     id: string,
     data: Pick<Article, 'title' | 'content'>,
-  ): Promise<Article> {
-    const record = await this.prisma.article.update({ where: { id }, data });
-
-    return toArticle(record);
+  ): Promise<void> {
+    await this.prisma.article.update({ where: { id }, data });
   }
 
   async delete(id: string): Promise<void> {

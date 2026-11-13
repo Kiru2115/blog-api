@@ -10,16 +10,7 @@ Feature: As the author I can edit my blog articles
         "content": "How I built the API of this blog, now with write endpoints."
       }
       """
-    Then the response status should be 200
-    And the response body should contain:
-      """
-      {
-        "id": "5e1f0a2b-0004-4000-8000-000000000004",
-        "title": "My first Nest.js API, updated",
-        "content": "How I built the API of this blog, now with write endpoints.",
-        "publishedAt": "2026-11-10T12:00:00.000Z"
-      }
-      """
+    Then the response status should be 204
     When I send a "GET" request to "/api/v1/articles/5e1f0a2b-0004-4000-8000-000000000004"
     Then the response body should contain:
       """

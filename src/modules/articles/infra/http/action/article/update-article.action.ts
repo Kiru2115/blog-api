@@ -1,4 +1,11 @@
-import { Body, Controller, HttpStatus, Put, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Put,
+  UseGuards,
+} from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import {
   ApiBearerAuth,
@@ -15,10 +22,6 @@ import { UnauthorizedResponse } from '../../../../../../core/http/response/unaut
 import { UuidParam } from '../../../../../../core/validation/decorator/uuid-v4-param.decorator';
 import { UpdateArticleCommand } from '../../../../application/command/update-article.command';
 import { ArticleRequest } from '../../request/article.request';
-import {
-  ArticleResponse,
-  toArticleResponse,
-} from '../../response/article.response';
 
 @ApiTags('articles')
 @ApiBearerAuth('access-token')
@@ -27,6 +30,7 @@ export class UpdateArticleAction {
   constructor(private readonly commandBus: CommandBus) {}
 
   @Put(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AdminGuard)
   @ApiOperation({
     summary: 'Replaces the title and the text of an article (admin only)',
@@ -37,9 +41,9 @@ export class UpdateArticleAction {
     format: 'uuid',
   })
   @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'The changed article. Its publication date stays the same',
-    type: ArticleResponse,
+    status: HttpStatus.NO_CONTENT,
+    description:
+      'The article is changed. Its publication date stays the same. The answer has no body',
   })
   @ApiResponse({
     status: HttpStatus.BAD_REQUEST,
@@ -65,11 +69,9 @@ export class UpdateArticleAction {
   async handle(
     @UuidParam('id') id: string,
     @Body() request: ArticleRequest,
-  ): Promise<ArticleResponse> {
-    const article = await this.commandBus.execute(
+  ): Promise<void> {
+    await this.commandBus.execute(
       new UpdateArticleCommand(id, request.title, request.content),
     );
-
-    return toArticleResponse(article);
   }
 }
